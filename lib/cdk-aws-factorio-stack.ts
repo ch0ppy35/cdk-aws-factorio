@@ -8,10 +8,11 @@ export class CdkAwsFactorioStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    const FACTORIO_IMAGE_TAG = "stable"
+    const FACTORIO_IMAGE_TAG = "stable";
 
     // The code that defines your stack goes here
     const vpc = new ec2.Vpc(this, "Factorio-VPC", {
+      cidr: "10.10.0.0/16",
       maxAzs: 1,
       natGateways: 0,
     });
@@ -34,7 +35,8 @@ export class CdkAwsFactorioStack extends cdk.Stack {
 
     const VOLUME_NAME = "FactorioEfsVolume";
 
-    const cfnTaskDef = taskDefinition.node.defaultChild as ecs.CfnTaskDefinition
+    const cfnTaskDef = taskDefinition.node
+      .defaultChild as ecs.CfnTaskDefinition;
     cfnTaskDef.addPropertyOverride("Volumes", [
       {
         EFSVolumeConfiguration: {
@@ -49,7 +51,10 @@ export class CdkAwsFactorioStack extends cdk.Stack {
         `factoriotools/factorio:${FACTORIO_IMAGE_TAG}`
       ),
       memoryReservationMiB: 1024,
-      logging: ecs.LogDrivers.awsLogs({ streamPrefix: "Factorio", logRetention: 7 }),
+      logging: ecs.LogDrivers.awsLogs({
+        streamPrefix: "Factorio",
+        logRetention: 7,
+      }),
     });
     container.addPortMappings(
       // Game port
